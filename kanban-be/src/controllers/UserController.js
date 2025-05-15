@@ -58,11 +58,6 @@ class UserController {
         }
     }
 
-    /**
-     * Create new user
-     * @param {Object} req - Express request object
-     * @param {Object} res - Express response object
-     */
     async createUser(req, res) {
         const { id_department, name, role, email, no_hp, password } = req.body;
 
@@ -136,11 +131,6 @@ class UserController {
         }
     }
 
-    /**
-     * Update user
-     * @param {Object} req - Express request object
-     * @param {Object} res - Express response object
-     */
     async updateUser(req, res) {
         const { id } = req.params;
         const { id_department, name, role, email, no_hp, password } = req.body;
@@ -217,11 +207,6 @@ class UserController {
         }
     }
 
-    /**
-     * Delete user
-     * @param {Object} req - Express request object
-     * @param {Object} res - Express response object
-     */
     async deleteUser(req, res) {
         const { id } = req.params;
 
