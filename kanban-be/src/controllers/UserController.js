@@ -1,7 +1,7 @@
 const prisma = require("../../prisma/client");
+const bcrypt = require("bcryptjs");
 
 class UserController {
-
     async getAllUsers(req, res) {
         try {
             const users = await prisma.user.findMany({
