@@ -34,7 +34,7 @@ const NOTE = {
  */
 exports.createKanban = async (req, res) => {
     const { id_users } = req.user;
-    const { tgl_produksi, parts_number, lokasi, box, klasifikasi, keterangan } =
+    const { tgl_produksi, nama_requester, parts_number, lokasi, box, klasifikasi, keterangan } =
         req.body;
 
     try {
@@ -45,6 +45,7 @@ exports.createKanban = async (req, res) => {
                 id_users,
                 id_department: user.id_department,
                 tgl_produksi: new Date(tgl_produksi),
+                nama_requester,
                 parts_number,
                 lokasi,
                 box,
@@ -91,6 +92,86 @@ exports.createKanban = async (req, res) => {
 };
 
 /**
+ * Update a Kanban request
+ * Only allows editing if no approvals have been made yet
+ */
+exports.updateKanban = async (req, res) => {
+    const { id_users } = req.user;
+    const { id_kanban } = req.params;
+    const { tgl_produksi, nama_requester, parts_number, lokasi, box, klasifikasi, keterangan } = req.body;
+
+    try {
+        // Find the Kanban request first
+        const kanban = await prisma.requestKanban.findUnique({
+            where: { id_kanban: parseInt(id_kanban) },
+            include: {
+                persetujuan: true
+            }
+        });
+
+        // Check if Kanban exists
+        if (!kanban) {
+            return res.status(404).json({ message: "Request Kanban tidak ditemukan" });
+        }
+
+        // Check if user is the creator of the Kanban
+        if (kanban.id_users !== id_users) {
+            return res.status(403).json({ message: "Anda tidak memiliki akses untuk mengedit Kanban ini" });
+        }
+
+        // Check if any approvals have been made
+        const hasApproval = kanban.persetujuan.some(approval => approval.approve === true);
+        
+        if (hasApproval) {
+            return res.status(403).json({ 
+                message: "Request Kanban tidak dapat diedit karena sudah ada yang melakukan approve"
+            });
+        }
+
+        // Update the Kanban request
+        const updatedKanban = await prisma.requestKanban.update({
+            where: { id_kanban: parseInt(id_kanban) },
+            data: {
+                tgl_produksi: tgl_produksi ? new Date(tgl_produksi) : undefined,
+                nama_requester: nama_requester || undefined,
+                parts_number: parts_number || undefined,
+                lokasi: lokasi || undefined,
+                box: box || undefined,
+                klasifikasi: klasifikasi || undefined,
+                keterangan: keterangan || undefined
+            }
+        });
+
+        // Notify approvers about the update
+        const approvers = await prisma.persetujuan.findMany({
+            where: {
+                id_kanban: parseInt(id_kanban),
+                approve: false
+            },
+            include: {
+                user: true
+            }
+        });
+
+        for (const approver of approvers) {
+            await sendNotification(
+                approver.user,
+                updatedKanban,
+                "Request Kanban yang perlu Anda approve telah diupdate."
+            );
+        }
+
+        res.json({
+            message: "Request Kanban berhasil diperbarui",
+            kanban: updatedKanban
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Gagal memperbarui request Kanban" });
+    }
+};
+
+/**
  * Get pending approvals for the current user
  */
 exports.getPendingApprovals = async (req, res) => {
@@ -117,6 +198,7 @@ exports.getPendingApprovals = async (req, res) => {
                         id_users: true,
                         id_department: true,
                         tgl_produksi: true,
+                        nama_requester: true,
                         parts_number: true,
                         lokasi: true,
                         box: true,

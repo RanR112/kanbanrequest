@@ -65,6 +65,7 @@ model RequestKanban {
   id_users        Int
   id_department   Int
   tgl_produksi    DateTime
+  nama_requester  String
   parts_number    String
   lokasi          String
   box             String

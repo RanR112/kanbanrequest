@@ -9,12 +9,14 @@ const {
     getIncomingForPC,
     getApprovedByPCKanban,
     rejectKanban,
+    updateKanban,
 } = require("../controllers/KanbanController");
 const { authenticateToken } = require("../middlewares/AuthMiddleware");
 
 kanbanRouter.use(authenticateToken)
 
 kanbanRouter.post("/request", createKanban);
+kanbanRouter.put("/:id_kanban", updateKanban);
 kanbanRouter.get("/pending", getPendingApprovals);
 kanbanRouter.post("/approve", approveKanban);
 kanbanRouter.get("/approved", getApprovedKanban);

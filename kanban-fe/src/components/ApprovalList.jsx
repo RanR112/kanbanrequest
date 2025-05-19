@@ -42,7 +42,7 @@ export default function ApprovalList() {
                 <ul>
                     {list.map((item) => (
                         <li key={item.id_kanban} style={{ marginBottom: "10px" }}>
-                            <strong>{item.requestKanban.parts_number}</strong> - {item.requestKanban.tgl_produksi}
+                            <strong>{item.requestKanban.parts_number}</strong> - {item.requestKanban.tgl_produksi} ({item.requestKanban.nama_requester})
                             <div style={{ marginTop: "5px" }}>
                                 <button onClick={() => handleApprove(item.id_kanban)} style={{ marginRight: "10px" }}>
                                     Approve

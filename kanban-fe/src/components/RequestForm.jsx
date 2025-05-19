@@ -3,6 +3,7 @@ import API from "../services/api";
 
 export default function RequestForm() {
     const [form, setForm] = useState({
+        nam_requester: "",
         parts_number: "",
         lokasi: "",
         box: "",
@@ -33,7 +34,11 @@ export default function RequestForm() {
     return (
         <form onSubmit={handleSubmit}>
             <h2>Request Kanban</h2>
-            {/* Input tanggal dihapus agar tidak diisi manual */}
+            <input
+                placeholder="Nama Requester"
+                name="nama_requester"
+                onChange={handleChange}
+            />
             <input
                 placeholder="Parts Number"
                 name="parts_number"
